@@ -1,14 +1,18 @@
 #!/bin/bash -e
 
 # If you want to use your own SSH key (with forwarding agent)
-CUSTOM_SSH_KEYNAME="defiant"
-CUSTOM_SSH_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIxK0j9EvqUDndkB8h+MKA6TqNstTyw66VVBuMVywqYxtH73qOzzBjSNIAlO1nT7zL2BBN3kQNL84nmbGevwckB+lzIZrc+Tzc2a1VhopthemftZw0XUnn6+uf8UU4K9d17434u/U12F3ZDOprJypmr9xOOy0zrX09ycZqMrs0B5QoZb6zCP5FzZTo8qGL0sB01zAyYgxw5u+RK8bpNGfTXJ5lakXfdVdB71Pubu1FybIqgR9vIg46FkygMZygT33jUt5pOGKddG++/4t0fHSv21OgXfFb6HNZHDFELY5b8hBRZmuQ+vMpvu+gsD5IabLj3B/rAwtgulCN/gCHqgxR bcafarel@defiant.redhat.com"
+#CUSTOM_SSH_KEYNAME="defiant"
+#CUSTOM_SSH_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIxK0j9EvqUDndkB8h+MKA6TqNstTyw66VVBuMVywqYxtH73qOzzBjSNIAlO1nT7zL2BBN3kQNL84nmbGevwckB+lzIZrc+Tzc2a1VhopthemftZw0XUnn6+uf8UU4K9d17434u/U12F3ZDOprJypmr9xOOy0zrX09ycZqMrs0B5QoZb6zCP5FzZTo8qGL0sB01zAyYgxw5u+RK8bpNGfTXJ5lakXfdVdB71Pubu1FybIqgR9vIg46FkygMZygT33jUt5pOGKddG++/4t0fHSv21OgXfFb6HNZHDFELY5b8hBRZmuQ+vMpvu+gsD5IabLj3B/rAwtgulCN/gCHqgxR bcafarel@defiant.redhat.com"
+#SSH_KEYNAME=${CUSTOM_SSH_KEYNAME}
 
-# Project, SSH key to use (default or ${CUSTOM_SSH_KEYNAME}), security group
+# Else use local key (will be generated if it does not exist)
+SSH_KEYNAME="default"
+
+# Standard project and security group names
 PROJECT="demo"
-SSH_KEYNAME=${CUSTOM_SSH_KEYNAME}
 SECGROUP="default"
 
+# Source credentials
 [[ -e ~/devstack/openrc ]] && source ~/devstack/openrc "${PROJECT}" "${PROJECT}"
 [[ -e ~/keystonerc_${PROJECT} ]] && source ~/keystonerc_${PROJECT}
 

@@ -2,8 +2,11 @@
 
 . $(dirname "${BASH_SOURCE}")/custom.sh
 
+# Disable port security (else packets would be rejected when exiting the service VMs)
 neutron net-update --port_security_enabled=False private
-for port in p1 p2 p3 p4 p5 p6 source_port dest_port
+
+# Create network ports for all VMs
+for port in p1in p1out p2in p2out p3in p3out source_vm_port dest_vm_port
 do
     neutron port-create --name "${port}" private
 done
@@ -11,31 +14,31 @@ done
 # SFC VMs
 nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p1)" \
-    --nic port-id="$(neutron port-show -f value -c id p2)" \
+    --nic port-id="$(neutron port-show -f value -c id p1in)" \
+    --nic port-id="$(neutron port-show -f value -c id p1out)" \
     vm1
 nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p3)" \
-    --nic port-id="$(neutron port-show -f value -c id p4)" \
+    --nic port-id="$(neutron port-show -f value -c id p2in)" \
+    --nic port-id="$(neutron port-show -f value -c id p2out)" \
     vm2
 nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p5)" \
-    --nic port-id="$(neutron port-show -f value -c id p6)" \
+    --nic port-id="$(neutron port-show -f value -c id p3in)" \
+    --nic port-id="$(neutron port-show -f value -c id p3out)" \
     vm3
 
 # Demo VMs
 nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id source_port)" \
+    --nic port-id="$(neutron port-show -f value -c id source_vm_port)" \
     source_vm
 nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id dest_port)" \
+    --nic port-id="$(neutron port-show -f value -c id dest_vm_port)" \
     dest_vm
 
-# Sample classifier
+# Sample classifier (to show additional parameters)
 neutron flow-classifier-create \
     --ethertype IPv4 \
     --source-ip-prefix 22.1.20.1/32 \
@@ -43,35 +46,38 @@ neutron flow-classifier-create \
     --protocol tcp \
     --source-port 23:23 \
     --destination-port 100:100 \
-    --logical-source-port p1 \
+    --logical-source-port source_vm_port \
     FC1
 
-# Demo classifier
-SOURCE_IP=$(openstack port show source_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
-DEST_IP=$(openstack port show dest_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
+# Demo classifier (catch the web traffic from source_vm to dest_vm)
+SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
+DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
 neutron flow-classifier-create \
     --ethertype IPv4 \
     --source-ip-prefix ${SOURCE_IP}/32 \
     --destination-ip-prefix ${DEST_IP}/32 \
     --protocol tcp \
     --destination-port 80:80 \
-    --logical-source-port source_port \
+    --logical-source-port source_vm_port \
     FC_demo
 
-neutron port-pair-create --ingress=p1 --egress=p2 PP1
-neutron port-pair-create --ingress=p3 --egress=p4 PP2
-neutron port-pair-create --ingress=p5 --egress=p6 PP3
+# Create the port pairs for all 3 VMs
+neutron port-pair-create --ingress=p1in --egress=p1out PP1
+neutron port-pair-create --ingress=p2in --egress=p2out PP2
+neutron port-pair-create --ingress=p3in --egress=p3out PP3
 
+# And the port pair groups
 neutron port-pair-group-create --port-pair PP1 --port-pair PP2 PG1
 neutron port-pair-group-create --port-pair PP3 PG2
 
+# The complete chain
 neutron port-chain-create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC1 --flow-classifier FC_demo PC1
 
-# Basic demo web server
+# Start a basic demo web server
 ssh cirros@${DEST_IP} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
 
-# Enable eth1 interface, add static routing
-for sfc_port in p1 p3 p5
+# On service VMs, enable eth1 interface and add static routing
+for sfc_port in p1in p2in p3in
 do
     ssh -T cirros@$(openstack port show ${sfc_port} -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2) <<EOF
 sudo sh -c 'echo "auto eth1" >> /etc/network/interfaces'
