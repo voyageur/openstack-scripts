@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 . $(dirname "${BASH_SOURCE}")/custom.sh
+. $(dirname "${BASH_SOURCE}")/tools.sh
 
 for inst in cirros1 cirros2
 do
@@ -17,6 +18,8 @@ done
 
 # Let the VMs boot
 sleep 5
+route_to_subnetpool
+
 # Basic web server
 for fixed_ip in $(openstack ip floating list -f value -c "Fixed IP Address")
 do

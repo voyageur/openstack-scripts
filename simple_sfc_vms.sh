@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 . $(dirname "${BASH_SOURCE}")/custom.sh
+. $(dirname "${BASH_SOURCE}")/tools.sh
 
 # Disable port security (else packets would be rejected when exiting the service VMs)
 neutron net-update --port_security_enabled=False private
@@ -48,6 +49,8 @@ neutron flow-classifier-create \
     --destination-port 100:100 \
     --logical-source-port source_vm_port \
     FC1
+
+route_to_subnetpool
 
 # Demo classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
