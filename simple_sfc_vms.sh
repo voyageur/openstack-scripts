@@ -50,8 +50,6 @@ neutron flow-classifier-create \
     --logical-source-port source_vm_port \
     FC1
 
-route_to_subnetpool
-
 # Demo classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
 DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
@@ -63,6 +61,9 @@ neutron flow-classifier-create \
     --destination-port 80:80 \
     --logical-source-port source_vm_port \
     FC_demo
+
+# Get easy access to the VMs
+route_to_subnetpool
 
 # Create the port pairs for all 3 VMs
 neutron port-pair-create --ingress=p1in --egress=p1out PP1
