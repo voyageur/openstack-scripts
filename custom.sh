@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# Basic configuration of the devstack
+# Credentials, SSH keys, security group
 
 # If you want to use your own SSH key (with forwarding agent)
 #CUSTOM_SSH_KEYNAME="defiant"

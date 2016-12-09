@@ -1,4 +1,7 @@
 #!/bin/bash -e
+# Creates some instances for networking-sfc demo/development:
+# a web server, another instance to use as client
+# three "service VMs" with two interface that will just route the packets to/from each interface
 
 . $(dirname "${BASH_SOURCE}")/custom.sh
 . $(dirname "${BASH_SOURCE}")/tools.sh

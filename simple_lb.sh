@@ -1,4 +1,7 @@
 #!/bin/bash -e
+# Creates an Octavia load balancer on HTTP port
+# Some instances should already be running as they will be added as members
+# (simple_vms.sh can create the needed instances)
 
 . $(dirname "${BASH_SOURCE}")/custom.sh
 

@@ -1,5 +1,5 @@
 #!/bin/bash -e
-
+# Creates 2 cirros VMs with a simple web server
 . $(dirname "${BASH_SOURCE}")/custom.sh
 . $(dirname "${BASH_SOURCE}")/tools.sh
 

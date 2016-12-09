@@ -1,4 +1,5 @@
 #!/bin/bash -e
+# Common functions
 
 function route_to_subnetpool {
     # Neutron no longer sets route to the created net:
