@@ -42,18 +42,7 @@ nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     --nic port-id="$(neutron port-show -f value -c id dest_vm_port)" \
     dest_vm
 
-# Sample classifier (to show additional parameters)
-neutron flow-classifier-create \
-    --ethertype IPv4 \
-    --source-ip-prefix 22.1.20.1/32 \
-    --destination-ip-prefix 172.4.5.6/32 \
-    --protocol tcp \
-    --source-port 23:23 \
-    --destination-port 100:100 \
-    --logical-source-port source_vm_port \
-    FC1
-
-# Demo classifier (catch the web traffic from source_vm to dest_vm)
+# HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
 DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
 neutron flow-classifier-create \
@@ -63,7 +52,16 @@ neutron flow-classifier-create \
     --protocol tcp \
     --destination-port 80:80 \
     --logical-source-port source_vm_port \
-    FC_demo
+    FC_http
+
+# UDP flow classifier (catch all UDP traffic from source_vm to dest_vm, like traceroute)
+neutron flow-classifier-create \
+    --ethertype IPv4 \
+    --source-ip-prefix ${SOURCE_IP}/32 \
+    --destination-ip-prefix ${DEST_IP}/32 \
+    --protocol udp \
+    --logical-source-port source_vm_port \
+    FC_udp
 
 # Get easy access to the VMs
 route_to_subnetpool
@@ -78,7 +76,7 @@ neutron port-pair-group-create --port-pair PP1 --port-pair PP2 PG1
 neutron port-pair-group-create --port-pair PP3 PG2
 
 # The complete chain
-neutron port-chain-create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC1 --flow-classifier FC_demo PC1
+neutron port-chain-create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC_udp --flow-classifier FC_http PC1
 
 # Start a basic demo web server
 ssh cirros@${DEST_IP} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
