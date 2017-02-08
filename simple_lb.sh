@@ -18,10 +18,11 @@ do
 done
 
 neutron lbaas-listener-create --loadbalancer ${LB} --protocol HTTP --protocol-port 80 --name ${LISTENER}
+sleep 5
 neutron lbaas-pool-create --lb-algorithm ROUND_ROBIN --listener ${LISTENER} --protocol HTTP --name ${POOL}
 
 for ip in $(openstack server list -f value -c Networks | sed "s/.*\(\(10.0\|192.168\)[^,]*\).*/\1/"); do
-    if neutron lbaas-member-show ${ip} ${POOL} > /dev/null;
+    if neutron lbaas-member-show ${ip} ${POOL} 2> /dev/null;
     then
         continue
     fi
