@@ -9,7 +9,7 @@ LB="lb1"
 POOL="pool1"
 LISTENER="listener1"
 
-neutron lbaas-loadbalancer-create $(neutron subnet-list | awk '/ private-subnet / {print $2}') --name ${LB}
+neutron lbaas-loadbalancer-create $(openstack subnet show private-subnet -f value -c id) --name ${LB}
 
 # Wait for creation
 while [ $(neutron lbaas-loadbalancer-show ${LB} -f value -c provisioning_status) != "ACTIVE" ];
