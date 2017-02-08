@@ -19,9 +19,9 @@ SECGROUP="default"
 [[ -e ~/keystonerc_${PROJECT} ]] && source ~/keystonerc_${PROJECT}
 
 # Use nano or tiny flavor
-FLAVOR=$(openstack flavor list -f value -c Name |grep nano|| echo m1.tiny)
+FLAVOR=$(openstack flavor list -f value -c Name | grep nano || echo m1.tiny)
 # Find cirros image
-IMAGE=$(openstack image list -f value -c Name|grep cirros|grep -v 'ramdisk\|kernel')
+IMAGE=$(openstack image list -f value -c Name | grep cirros | grep -v 'ramdisk\|kernel')
 
 if [ "${SSH_KEYNAME}" = "default" ]
 then
@@ -40,13 +40,13 @@ fi
 # Note: check on existing rules is basic
 SECGROUP_RULES=$(openstack security group show "${SECGROUP}" -f value -c rules)
 if ! echo "${SECGROUP_RULES}" | grep -q icmp
-then 
+then
     openstack security group rule create --proto icmp "${SECGROUP}"
 fi
 for port in 22 80
 do
     if ! echo "${SECGROUP_RULES}" | grep -q "port_range_max='${port}', port_range_min='${port}'"
-    then 
+    then
         openstack security group rule create --proto tcp --dst-port ${port} "${SECGROUP}"
     fi
 done

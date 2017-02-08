@@ -43,8 +43,8 @@ nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
     dest_vm
 
 # HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
-SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
-DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2)
+SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
+DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
 neutron flow-classifier-create \
     --ethertype IPv4 \
     --source-ip-prefix ${SOURCE_IP}/32 \
@@ -84,7 +84,7 @@ ssh cirros@${DEST_IP} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to
 # On service VMs, enable eth1 interface and add static routing
 for sfc_port in p1in p2in p3in
 do
-    ssh -T cirros@$(openstack port show ${sfc_port} -f value -c fixed_ips|grep "ip_address='[0-9]*\."|cut -d"'" -f2) <<EOF
+    ssh -T cirros@$(openstack port show ${sfc_port} -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2) <<EOF
 sudo sh -c 'echo "auto eth1" >> /etc/network/interfaces'
 sudo sh -c 'echo "iface eth1 inet dhcp" >> /etc/network/interfaces'
 sudo /etc/init.d/S40network restart
