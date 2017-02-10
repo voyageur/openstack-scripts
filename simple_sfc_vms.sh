@@ -7,39 +7,39 @@
 . $(dirname "${BASH_SOURCE}")/tools.sh
 
 # Disable port security (else packets would be rejected when exiting the service VMs)
-neutron net-update --port_security_enabled=False private
+openstack network set --disable-port-security private
 
 # Create network ports for all VMs
 for port in p1in p1out p2in p2out p3in p3out source_vm_port dest_vm_port
 do
-    neutron port-create --name "${port}" private
+    openstack port create --network private "${port}"
 done
 
 # SFC VMs
-nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p1in)" \
-    --nic port-id="$(neutron port-show -f value -c id p1out)" \
+openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
+    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
+    --nic port-id="$(openstack port show -f value -c id p1in)" \
+    --nic port-id="$(openstack port show -f value -c id p1out)" \
     vm1
-nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p2in)" \
-    --nic port-id="$(neutron port-show -f value -c id p2out)" \
+openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
+    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
+    --nic port-id="$(openstack port show -f value -c id p2in)" \
+    --nic port-id="$(openstack port show -f value -c id p2out)" \
     vm2
-nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id p3in)" \
-    --nic port-id="$(neutron port-show -f value -c id p3out)" \
+openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
+    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
+    --nic port-id="$(openstack port show -f value -c id p3in)" \
+    --nic port-id="$(openstack port show -f value -c id p3out)" \
     vm3
 
 # Demo VMs
-nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id source_vm_port)" \
+openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
+    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
+    --nic port-id="$(openstack port show -f value -c id source_vm_port)" \
     source_vm
-nova boot --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-groups "${SECGROUP}" \
-    --nic port-id="$(neutron port-show -f value -c id dest_vm_port)" \
+openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
+    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
+    --nic port-id="$(openstack port show -f value -c id dest_vm_port)" \
     dest_vm
 
 # HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
