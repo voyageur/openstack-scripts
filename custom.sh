@@ -23,8 +23,8 @@ elif [[ -e ~/keystonerc_${PROJECT} ]]; then
     source ~/keystonerc_${PROJECT}
 elif [[ -e ~/overcloudrc ]]; then
     echo "Sourcing overcloud credentials"
-    echo "WARNING: not suppported yet"
-    source ~/overclourc
+    echo "WARNING: not fully suppported yet"
+    source ~/overcloudrc
 else
     echo "Could not find any credentials file"
     exit 1
