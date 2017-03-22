@@ -14,9 +14,21 @@ SSH_KEYNAME="default"
 PROJECT="demo"
 SECGROUP="default"
 
-# Source credentials
-[[ -e ~/devstack/openrc ]] && source ~/devstack/openrc "${PROJECT}" "${PROJECT}"
-[[ -e ~/keystonerc_${PROJECT} ]] && source ~/keystonerc_${PROJECT}
+# Source credentials (devstack, packstack, tripleo)
+if [[ -e ~/devstack/openrc ]]; then
+    echo "Sourcing devstack ${PROJECT} credentials"
+    source ~/devstack/openrc "${PROJECT}" "${PROJECT}"
+elif [[ -e ~/keystonerc_${PROJECT} ]]; then
+    echo "Sourcing packstack ${PROJECT} credentials"
+    source ~/keystonerc_${PROJECT}
+elif [[ -e ~/overcloudrc ]]; then
+    echo "Sourcing overcloud credentials"
+    echo "WARNING: not suppported yet"
+    source ~/overclourc
+else
+    echo "Could not find any credentials file"
+    exit 1
+fi
 
 # Use nano or tiny flavor
 FLAVOR=$(openstack flavor list -f value -c Name | grep nano || echo m1.tiny)
