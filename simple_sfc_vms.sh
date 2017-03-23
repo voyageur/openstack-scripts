@@ -17,30 +17,25 @@ done
 
 # SFC VMs
 openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
     --nic port-id="$(openstack port show -f value -c id p1in)" \
     --nic port-id="$(openstack port show -f value -c id p1out)" \
-    vm1
+    --key-name "${SSH_KEYNAME}" vm1
 openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
     --nic port-id="$(openstack port show -f value -c id p2in)" \
     --nic port-id="$(openstack port show -f value -c id p2out)" \
-    vm2
+    --key-name "${SSH_KEYNAME}" vm2
 openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
     --nic port-id="$(openstack port show -f value -c id p3in)" \
     --nic port-id="$(openstack port show -f value -c id p3out)" \
-    vm3
+    --key-name "${SSH_KEYNAME}" vm3
 
 # Demo VMs
 openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
     --nic port-id="$(openstack port show -f value -c id source_vm_port)" \
-    source_vm
+    --key-name "${SSH_KEYNAME}" source_vm
 openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
-    --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
     --nic port-id="$(openstack port show -f value -c id dest_vm_port)" \
-    dest_vm
+    --key-name "${SSH_KEYNAME}" dest_vm
 
 # HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
