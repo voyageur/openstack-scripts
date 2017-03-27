@@ -37,6 +37,17 @@ openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
     --nic port-id="$(openstack port show -f value -c id dest_vm_port)" \
     --key-name "${SSH_KEYNAME}" dest_vm
 
+# Floating IPs
+SOURCE_FLOATING=$(openstack floating ip create public -f value -c floating_ip_address)
+openstack server add floating ip source_vm ${SOURCE_FLOATING}
+DEST_FLOATING=$(openstack floating ip create public -f value -c floating_ip_address)
+openstack server add floating ip dest_vm ${DEST_FLOATING}
+for i in 1 2 3; do
+    floating_ip=$(openstack floating ip create public -f value -c floating_ip_address)
+    declare VM${i}_FLOATING=${floating_ip}
+    openstack server add floating ip vm${i} ${floating_ip}
+done
+
 # HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
 DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
@@ -58,7 +69,7 @@ neutron flow-classifier-create \
     --logical-source-port source_vm_port \
     FC_udp
 
-# Get easy access to the VMs
+# Get easy access to the VMs (single node)
 route_to_subnetpool
 
 # Create the port pairs for all 3 VMs
@@ -74,12 +85,13 @@ neutron port-pair-group-create --port-pair PP3 PG2
 neutron port-chain-create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC_udp --flow-classifier FC_http PC1
 
 # Start a basic demo web server
-ssh cirros@${DEST_IP} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
+ssh cirros@${DEST_FLOATING} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
 
 # On service VMs, enable eth1 interface and add static routing
-for sfc_port in p1in p2in p3in
+for i in 1 2 3
 do
-    ssh -T cirros@$(openstack port show ${sfc_port} -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2) <<EOF
+    ip_name=VM${i}_FLOATING
+    ssh -T cirros@${!ip_name} <<EOF
 sudo sh -c 'echo "auto eth1" >> /etc/network/interfaces'
 sudo sh -c 'echo "iface eth1 inet dhcp" >> /etc/network/interfaces'
 sudo /etc/init.d/S40network restart

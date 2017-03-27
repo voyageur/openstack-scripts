@@ -10,11 +10,8 @@
 # Else use local key (will be generated if it does not exist)
 SSH_KEYNAME="default"
 
-# Standard project and security group names
-PROJECT="demo"
-SECGROUP="default"
-
 # Source credentials (devstack, packstack, tripleo)
+PROJECT="demo" # tripleo uses admin project
 if [[ -e ~/devstack/openrc ]]; then
     echo "Sourcing devstack ${PROJECT} credentials"
     source ~/devstack/openrc "${PROJECT}" "${PROJECT}"
@@ -25,6 +22,7 @@ elif [[ -e ~/overcloudrc ]]; then
     echo "Sourcing overcloud credentials"
     echo "WARNING: not fully suppported yet"
     source ~/overcloudrc
+    openstack network show public 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
 else
     echo "Could not find any credentials file"
     exit 1
@@ -50,6 +48,7 @@ else
 fi
 
 # Note: check on existing rules is basic
+SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null || echo default)
 SECGROUP_RULES=$(openstack security group show "${SECGROUP}" -f value -c rules)
 if ! echo "${SECGROUP_RULES}" | grep -q icmp
 then

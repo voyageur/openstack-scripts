@@ -6,7 +6,12 @@ function route_to_subnetpool {
     # https://github.com/openstack-dev/devstack/commit/1493bdeba24674f6634160d51b8081c571df4017
     # Add/replace it here for ease of use
     local ROUTER=$(openstack router list -f value -c ID)
+    # No router
     if [ -z "${ROUTER}" ]; then
+        return
+    fi
+    # No namespace (different node?)
+    if ! sudo ip netns list | grep -q qrouter-"${ROUTER}"; then
         return
     fi
 
