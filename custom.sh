@@ -48,7 +48,10 @@ else
 fi
 
 # Note: check on existing rules is basic
-SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null || echo default)
+SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null)
+if [ -z "${SECGROUP}" ]; then
+    SECGROUP=default
+fi
 SECGROUP_RULES=$(openstack security group show "${SECGROUP}" -f value -c rules)
 if ! echo "${SECGROUP_RULES}" | grep -q icmp
 then
