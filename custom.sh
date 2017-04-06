@@ -22,6 +22,9 @@ elif [[ -e ~/overcloudrc ]]; then
     echo "Sourcing overcloud credentials"
     echo "WARNING: not fully suppported yet"
     source ~/overcloudrc
+
+    OVERCLOUD=1
+    # Basic setup if the overcloud looks empty
     openstack network show public 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
 else
     echo "Could not find any credentials file"
@@ -48,9 +51,10 @@ else
 fi
 
 # Note: check on existing rules is basic
-SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null)
-if [ -z "${SECGROUP}" ]; then
+if [ -z "${OVERCLOUD}" ]; then
     SECGROUP=default
+else
+    SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null)
 fi
 SECGROUP_RULES=$(openstack security group show "${SECGROUP}" -f value -c rules)
 if ! echo "${SECGROUP_RULES}" | grep -q icmp
