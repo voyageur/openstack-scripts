@@ -51,7 +51,7 @@ done
 # HTTP Flow classifier (catch the web traffic from source_vm to dest_vm)
 SOURCE_IP=$(openstack port show source_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
 DEST_IP=$(openstack port show dest_vm_port -f value -c fixed_ips | grep "ip_address='[0-9]*\." | cut -d"'" -f2)
-neutron flow-classifier-create \
+openstack sfc flow classifier create \
     --ethertype IPv4 \
     --source-ip-prefix ${SOURCE_IP}/32 \
     --destination-ip-prefix ${DEST_IP}/32 \
@@ -61,7 +61,7 @@ neutron flow-classifier-create \
     FC_http
 
 # UDP flow classifier (catch all UDP traffic from source_vm to dest_vm, like traceroute)
-neutron flow-classifier-create \
+openstack sfc flow classifier create \
     --ethertype IPv4 \
     --source-ip-prefix ${SOURCE_IP}/32 \
     --destination-ip-prefix ${DEST_IP}/32 \
@@ -73,16 +73,16 @@ neutron flow-classifier-create \
 route_to_subnetpool
 
 # Create the port pairs for all 3 VMs
-neutron port-pair-create --ingress=p1in --egress=p1out PP1
-neutron port-pair-create --ingress=p2in --egress=p2out PP2
-neutron port-pair-create --ingress=p3in --egress=p3out PP3
+openstack sfc port pair create --ingress=p1in --egress=p1out PP1
+openstack sfc port pair create --ingress=p2in --egress=p2out PP2
+openstack sfc port pair create --ingress=p3in --egress=p3out PP3
 
 # And the port pair groups
-neutron port-pair-group-create --port-pair PP1 --port-pair PP2 PG1
-neutron port-pair-group-create --port-pair PP3 PG2
+openstack sfc port pair group create --port-pair PP1 --port-pair PP2 PG1
+openstack sfc port pair group create --port-pair PP3 PG2
 
 # The complete chain
-neutron port-chain-create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC_udp --flow-classifier FC_http PC1
+openstack sfc port chain create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC_udp --flow-classifier FC_http PC1
 
 # Start a basic demo web server
 ssh cirros@${DEST_FLOATING} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
