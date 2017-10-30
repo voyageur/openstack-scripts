@@ -9,24 +9,25 @@ LB="lb1"
 POOL="pool1"
 LISTENER="listener1"
 
-neutron lbaas-loadbalancer-create $(openstack subnet show private-subnet -f value -c id) --name ${LB}
+openstack loadbalancer create --vip-subnet-id $(openstack subnet show private-subnet -f value -c id) --name ${LB}
 
 # Wait for creation
-while [ $(neutron lbaas-loadbalancer-show ${LB} -f value -c provisioning_status) != "ACTIVE" ];
+while [ $(openstack loadbalancer show ${LB} -f value -c provisioning_status) != "ACTIVE" ];
 do
     sleep 5;
 done
 
-neutron lbaas-listener-create --loadbalancer ${LB} --protocol HTTP --protocol-port 80 --name ${LISTENER}
+openstack loadbalancer listener create --protocol HTTP --protocol-port 80 --name ${LISTENER} ${LB}
 sleep 5
-neutron lbaas-pool-create --lb-algorithm ROUND_ROBIN --listener ${LISTENER} --protocol HTTP --name ${POOL}
+openstack loadbalancer pool create --lb-algorithm ROUND_ROBIN --listener ${LISTENER} --protocol HTTP --name ${POOL}
+
 
 for ip in $(openstack server list -f value -c Networks | sed "s/.*\(\(10.0\|192.168\)[^,]*\).*/\1/"); do
-    if neutron lbaas-member-show ${ip} ${POOL} 2> /dev/null;
+    if openstack loadbalancer member show ${ip} ${POOL} 2> /dev/null;
     then
         continue
     fi
-    until neutron lbaas-member-create  --subnet private-subnet --address ${ip} --name ${ip} --protocol-port 80 ${POOL}
+    until openstack loadbalancer member create --subnet-id private-subnet --address ${ip} --name ${ip} --protocol-port 80 ${POOL}
     do
         sleep 5
     done
