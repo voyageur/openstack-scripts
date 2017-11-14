@@ -22,7 +22,7 @@ sleep 5
 openstack loadbalancer pool create --lb-algorithm ROUND_ROBIN --listener ${LISTENER} --protocol HTTP --name ${POOL}
 
 
-for ip in $(openstack server list -f value -c Networks | sed "s/.*\(\(10.0\|192.168\)[^,]*\).*/\1/"); do
+for ip in $(openstack server list -f value -c Networks | sed "s/.*\(\(10\.0\|192\.168\)[^,]*\).*/\1/"); do
     if openstack loadbalancer member show ${ip} ${POOL} 2> /dev/null;
     then
         continue
