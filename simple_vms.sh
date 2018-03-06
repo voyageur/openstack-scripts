@@ -9,9 +9,9 @@ do
     then
         openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
             --key-name "${SSH_KEYNAME}" --security-group "${SECGROUP}" \
-            "${inst}"
+            --network "${PRIV_NETWORK}" "${inst}"
 
-        floating=$(openstack floating ip create public -f value -c floating_ip_address)
+        floating=$(openstack floating ip create "${PUB_NETWORK}" -f value -c floating_ip_address)
         openstack server add floating ip "${inst}" "${floating}"
     fi
 done

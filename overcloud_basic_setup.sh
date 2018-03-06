@@ -24,16 +24,16 @@ openstack image create "cirros" \
 openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
 
 # Public network (direct access)
-openstack network create public --share --external --provider-network-type flat --provider-physical-network datacentre
-openstack subnet create public-subnet --network public --subnet-range 192.168.24.0/24 --gateway 192.168.24.1 --allocation-pool start=192.168.24.100,end=192.168.24.120 --no-dhcp
+openstack network create "${PUB_NETWORK}" --share --external --provider-network-type flat --provider-physical-network datacentre
+openstack subnet create public-subnet --network "${PUB_NETWORK}" --subnet-range 192.168.24.0/24 --gateway 192.168.24.1 --allocation-pool start=192.168.24.100,end=192.168.24.120 --no-dhcp
 
 # Private network
-openstack network create private --provider-network-type vxlan
-openstack subnet create private-subnet --network private --subnet-range 172.24.4.0/24 --gateway 172.24.4.1 --dns-nameserver 8.8.8.8
+openstack network create "${PRIV_NETWORK}" --provider-network-type vxlan
+openstack subnet create private-subnet --network "${PRIV_NETWORK}" --subnet-range 172.24.4.0/24 --gateway 172.24.4.1 --dns-nameserver 8.8.8.8
 
 # And link them both
 openstack router create router1
-openstack router set --external-gateway public router1
+openstack router set --external-gateway "${PUB_NETWORK}" router1
 openstack router add subnet router1 private-subnet
 
 # Cleanup

@@ -10,6 +10,10 @@
 # Else use local key (will be generated if it does not exist)
 SSH_KEYNAME="default"
 
+# Default networks
+PRIV_NETWORK="private"
+PUB_NETWORK="public"
+
 # Source credentials (devstack, packstack, tripleo)
 PROJECT="demo" # tripleo uses admin project
 if [[ -e ~/devstack/openrc ]]; then
@@ -25,7 +29,7 @@ elif [[ -e ~/overcloudrc ]]; then
 
     OVERCLOUD=1
     # Basic setup if the overcloud looks empty
-    openstack network show public 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
+    openstack network show "${PUB_NETWORK}" 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
 else
     echo "Could not find any credentials file"
     exit 1

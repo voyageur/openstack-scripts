@@ -7,12 +7,12 @@
 . $(dirname "${BASH_SOURCE}")/tools.sh
 
 # Disable port security (else packets would be rejected when exiting the service VMs)
-openstack network set --disable-port-security private
+openstack network set --disable-port-security "${PRIV_NETWORK}"
 
 # Create network ports for all VMs
 for port in p1in p1out p2in p2out p3in p3out source_vm_port dest_vm_port
 do
-    openstack port create --network private "${port}"
+    openstack port create --network "${PRIV_NETWORK}" "${port}"
 done
 
 # SFC VMs
@@ -38,12 +38,12 @@ openstack server create --image "${IMAGE}" --flavor "${FLAVOR}" \
     --key-name "${SSH_KEYNAME}" dest_vm
 
 # Floating IPs
-SOURCE_FLOATING=$(openstack floating ip create public -f value -c floating_ip_address)
+SOURCE_FLOATING=$(openstack floating ip create "${PUB_NETWORK}" -f value -c floating_ip_address)
 openstack server add floating ip source_vm ${SOURCE_FLOATING}
-DEST_FLOATING=$(openstack floating ip create public -f value -c floating_ip_address)
+DEST_FLOATING=$(openstack floating ip create "${PUB_NETWORK}" -f value -c floating_ip_address)
 openstack server add floating ip dest_vm ${DEST_FLOATING}
 for i in 1 2 3; do
-    floating_ip=$(openstack floating ip create public -f value -c floating_ip_address)
+    floating_ip=$(openstack floating ip create "${PUB_NETWORK}" -f value -c floating_ip_address)
     declare VM${i}_FLOATING=${floating_ip}
     openstack server add floating ip vm${i} ${floating_ip}
 done
