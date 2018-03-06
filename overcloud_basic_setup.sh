@@ -13,7 +13,8 @@ fi
 CIRROS=/tmp/cirros.img
 
 # Upload cirros
-curl -LS -o "${CIRROS}" http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img
+CIRROS_VER=0.4.0
+curl -LS -o "${CIRROS}" http://download.cirros-cloud.net/${CIRROS_VER}/cirros-${CIRROS_VER}-x86_64-disk.img
 openstack image create "cirros" \
   --file "${CIRROS}" \
   --disk-format qcow2 --container-format bare \
