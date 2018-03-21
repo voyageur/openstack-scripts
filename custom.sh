@@ -28,8 +28,9 @@ elif [[ -e ~/overcloudrc ]]; then
     source ~/overcloudrc
 
     OVERCLOUD=1
+    PUB_NETWORK="nova"
     # Basic setup if the overcloud looks empty
-    openstack network show "${PUB_NETWORK}" 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
+    openstack router show router1 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
 else
     echo "Could not find any credentials file"
     exit 1
