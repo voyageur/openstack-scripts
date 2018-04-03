@@ -30,7 +30,7 @@ elif [[ -e ~/overcloudrc ]]; then
     OVERCLOUD=1
     PUB_NETWORK="nova"
     # Basic setup if the overcloud looks empty
-    openstack router show router1 2>/dev/null || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
+    openstack router show router1 > /dev/null 2>&1 || $(dirname "${BASH_SOURCE}")/overcloud_basic_setup.sh
 else
     echo "Could not find any credentials file"
     exit 1
@@ -59,7 +59,7 @@ fi
 if [ -z "${OVERCLOUD}" ]; then
     SECGROUP=default
 else
-    SECGROUP=$(openstack security group list -f value -c ID --project admin 2> /dev/null)
+    SECGROUP=$(openstack security group list -f value -c ID -c Name --project admin|grep default$|cut -d' ' -f1)
 fi
 SECGROUP_RULES=$(openstack security group show "${SECGROUP}" -f value -c rules)
 if ! echo "${SECGROUP_RULES}" | grep -q icmp
