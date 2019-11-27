@@ -17,7 +17,7 @@ function route_to_subnetpool {
 
     local NET_GATEWAY=$(sudo ip netns exec qrouter-"${ROUTER}" ip -4 route get 8.8.8.8 | head -n1 | awk '{print $7}')
     # Filter IPv6 pool out
-    local SUBNET_POOL=$(openstack subnet pool list -f value -c Prefixes | grep -v :)
+    local SUBNET_POOL=$(openstack subnet pool list -f value -c Prefixes | grep -v : | sed -e "s/.*'\(.*\)'.*/\1/")
 
     sudo ip route replace "${SUBNET_POOL}" via "${NET_GATEWAY}"
 }
