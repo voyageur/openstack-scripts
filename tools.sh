@@ -21,3 +21,20 @@ function route_to_subnetpool {
 
     sudo ip route replace "${SUBNET_POOL}" via "${NET_GATEWAY}"
 }
+
+function wait_for_ssh {
+    # Try to connect to SSH
+    local SSH=${1}
+    local RETRIES=${2:-5}
+
+    for i in $(seq ${RETRIES})
+    do
+        STATUS=$(ssh -o "ConnectTimeout=2" "${SSH}" echo ok 2> /dev/null || true)
+        if [ "${STATUS}" == "ok" ]
+        then
+            return 0
+        fi
+    done
+
+    return 1
+}
