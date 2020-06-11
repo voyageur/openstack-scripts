@@ -29,7 +29,7 @@ function wait_for_ssh {
 
     for i in $(seq ${RETRIES})
     do
-        STATUS=$(ssh -o "ConnectTimeout=2" "${SSH}" echo ok 2> /dev/null || true)
+        STATUS=$(ssh -o "ConnectTimeout=10" "${SSH}" echo ok 2> /dev/null || true)
         if [ "${STATUS}" == "ok" ]
         then
             return 0
