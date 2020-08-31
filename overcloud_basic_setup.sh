@@ -10,12 +10,12 @@ else
     exit 1
 fi
 
-CIRROS=/tmp/cirros.img
+CIRROS_VER=0.5.1
+CIRROS=/tmp/cirros-${CIRROS_VER}.img
 
 # Upload cirros
 if ! openstack image show "cirros" > /dev/null 2>&1
 then
-    CIRROS_VER=0.4.0
     curl -LS -o "${CIRROS}" http://download.cirros-cloud.net/${CIRROS_VER}/cirros-${CIRROS_VER}-x86_64-disk.img
     openstack image create "cirros" \
       --file "${CIRROS}" \
