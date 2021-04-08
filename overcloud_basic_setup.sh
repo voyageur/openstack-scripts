@@ -10,7 +10,7 @@ else
     exit 1
 fi
 
-CIRROS_VER=0.5.1
+CIRROS_VER=0.5.2
 CIRROS=/tmp/cirros-${CIRROS_VER}.img
 
 # Upload cirros
@@ -26,7 +26,7 @@ fi
 # Flavor
 if ! openstack flavor show m1.nano > /dev/null 2>&1
 then
-    openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+    openstack flavor create --id 0 --vcpus 1 --ram 128 --disk 1 m1.nano
 fi
 
 # Public network (direct access)
