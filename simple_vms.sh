@@ -29,7 +29,7 @@ done
 # Basic web server
 for vm_ip in ${VM_IPS}
 do
-    ssh cirros@${vm_ip} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&' 2> /dev/null
+    basic_web_server cirros@${vm_ip}
 done
 
 openstack server list
