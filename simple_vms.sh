@@ -18,16 +18,17 @@ done
 
 route_to_subnetpool
 
-VM_IPS=$(openstack floating ip list -f value -c "Floating IP Address" | grep -v None)
+FIXED_IPS=$(openstack floating ip list -f value -c "Fixed IP Address" | grep -v None)
+FLOATING_IPS=$(openstack floating ip list -f value -c "Floating IP Address" | grep -v None)
 # Let the VMs boot
-for vm_ip in ${VM_IPS}
+for vm_ip in ${FIXED_IPS}
 do
     echo "Waiting for ${vm_ip} connection"
     wait_for_ssh cirros@${vm_ip}
 done
 
 # Basic web server
-for vm_ip in ${VM_IPS}
+for vm_ip in ${FIXED_IPS}
 do
     basic_web_server cirros@${vm_ip}
 done
