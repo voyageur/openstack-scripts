@@ -29,9 +29,9 @@ function ssh_command {
     # For OVN deployment, get namespace
     PRIVATE_METADATA=$(openstack network show private -f value -c id)
     if sudo ip netns list | grep -q ovnmeta-"${PRIVATE_METADATA}"; then
-        SSH_COMMAND="sudo ip netns exec ovnmeta-${PRIVATE_METADATA} ssh -i ${HOME}/.ssh/id_rsa"
+        SSH_COMMAND="sudo ip netns exec ovnmeta-${PRIVATE_METADATA} ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${HOME}/.ssh/id_rsa"
     else
-        SSH_COMMAND="ssh"
+        SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     fi
 }
 

@@ -85,13 +85,14 @@ openstack sfc port pair group create --port-pair PP3 PG2
 openstack sfc port chain create --port-pair-group PG1 --port-pair-group PG2 --flow-classifier FC_udp --flow-classifier FC_http PC1
 
 # Start a basic demo web server
-ssh cirros@${DEST_FLOATING} 'while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $(hostname)" | sudo nc -l -p 80 ; done&'
+basic_web_server cirros@${DEST_FLOATING}
 
 # On service VMs, enable eth1 interface and add static routing
+ssh_command
 for i in 1 2 3
 do
     ip_name=VM${i}_FLOATING
-    ssh -T cirros@${!ip_name} <<EOF
+    ${SSH_COMMAND} -T cirros@${!ip_name} <<EOF
 sudo sh -c 'echo "auto eth1" >> /etc/network/interfaces'
 sudo sh -c 'echo "iface eth1 inet dhcp" >> /etc/network/interfaces'
 sudo /etc/init.d/S40network restart
